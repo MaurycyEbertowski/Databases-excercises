@@ -1,0 +1,25 @@
+1. Zależności funkcyjne dla tabeli zamowienia
+
+id_produktu -> nazwa_produktu, cena_produktu, VAT	#dla danego id_produktu, zawsze będzie ta sama nazwa_produktu, cena_produktu i VAT
+id_klienta -> nazwa_klienta				#dla danego id_klienta, zawsze będzie ta sama nazwa_klienta
+nazwa_produktu -> VAT					#każdy produkt ma inny VAT
+suma_netto, VAT -> suma_brutto  			#brutto = netto + VAT
+id_klienta, data_zamowienia -> zamowienie		#dany klient ma danego dnia tylko jedno zamowienie
+
+
+2. Klucze kandydujące
+
+id_produktu
+id_klienta
+id_klienta + data_zamowienia
+
+
+3. Pomieszczenia
+
+Zależności funkcyjne:
+id_pomieszczenia -> numer_pomieszczenia, powierzchnia, liczba_okien, liczba_drzwi
+id_budynku -> ulica, miasto, kod_pocztowy
+miasto, ulica -> kod_pocztowy
+
+Klucze kandydujące:
+id_pomieszczenia, id_budynku
