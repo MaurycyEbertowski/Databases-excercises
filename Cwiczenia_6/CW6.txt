@@ -1,0 +1,78 @@
+--a
+UPDATE ksiegowosc.pracownicy
+SET telefon = CONCAT('(+48) ', telefon)
+WHERE telefon IS NOT NULL;
+
+--b
+UPDATE ksiegowosc.pracownicy
+SET telefon = CONCAT(
+    LEFT(telefon, 9), '-', SUBSTRING(telefon FROM 10 FOR 3), '-', RIGHT(telefon, 3)
+);
+
+--c
+SELECT * FROM ksiegowosc.pracownicy
+WHERE LENGTH(nazwisko) = (
+    SELECT MAX(LENGTH(nazwisko)) FROM ksiegowosc.pracownicy
+);
+
+--d
+SELECT pracownicy.id_pracownika, imie, nazwisko, MD5(imie || nazwisko) AS kodowane_imie_nazwisko, MD5(cast(kwota as text)) AS kodowana_pensja
+FROM ksiegowosc.pracownicy
+JOIN ksiegowosc.wynagrodzenie ON pracownicy.id_pracownika = wynagrodzenie.id_pracownika
+JOIN ksiegowosc.pensja ON wynagrodzenie.id_pensji = pensja.id_pensji;
+
+--e
+SELECT pracownicy.id_pracownika, pracownicy.imie, pracownicy.nazwisko,
+       pensja.kwota AS pensja, premia.kwota AS premia
+FROM ksiegowosc.pracownicy
+LEFT JOIN ksiegowosc.wynagrodzenie ON pracownicy.id_pracownika = wynagrodzenie.id_pracownika
+LEFT JOIN ksiegowosc.pensja ON wynagrodzenie.id_pensji = pensja.id_pensji
+LEFT JOIN ksiegowosc.premia ON wynagrodzenie.id_premii = premia.id_premii;
+
+--f
+SELECT 
+    'Pracownik ' || pracownicy.imie || ' ' || pracownicy.nazwisko || ', w dniu ' || godziny.data1 ||
+    ' otrzymał pensję całkowitą na kwotę ' || (pensja.kwota + premia.kwota) || ' zł, gdzie wynagrodzenie zasadnicze wynosiło ' || pensja.kwota || ' zł, a premia ' || premia.kwota || ' zł'
+AS raport
+FROM ksiegowosc.pracownicy
+JOIN ksiegowosc.wynagrodzenie ON pracownicy.id_pracownika = wynagrodzenie.id_pracownika
+JOIN ksiegowosc.pensja ON wynagrodzenie.id_pensji = pensja.id_pensji
+JOIN ksiegowosc.premia ON wynagrodzenie.id_premii = premia.id_premii
+JOIN ksiegowosc.godziny ON pracownicy.id_pracownika = godziny.id_pracownika;
+
+
+Zadanie 2
+Tabela 1
+Stworzenie oddzielnych tabel Lekarze, Pacjenci, Zabiegi, w których przechowywane będą jedynie IDPracownika/IDPacjenta/IDZabiegu oraz imiona i nazwiska/nazwa zabiegu,
+oraz stworzenie głównej tabeli Wizyty, w której będą znajdowały się jedynie klucze obce z powyższych tabel, a same wizyty posortowane są według daty.
+
+Pracownicy						Pacjenci					Zabiegi
+IDPracownika / Imię i nazwisko				IDPacjenta / Imię i nazwisko			IDZabiegu / Nazwa zabiegu
+S1011	     / Maria Nowak				P100	   / Anna Jeleń				Z496	  / Lakowanie
+S1024	     / Jan Kowalski				P105	   / Jarosław Nicpoń			Z500	  / Borowanie
+S1034	     / Marek Potocki				P108	   / Joanna Nosek			Z503	  / Usuwanie kamienia
+S1045	     / Anna Jabłońska				P120	   / Jan Kałuża
+							P123	   / Olga Nowacka
+							P130	   / Jerzy Lis
+
+Wizyty
+IDPracownika / IDPacjenta / IDZabiegu / Data wizyty
+S1011	     / P100	  / Z500      / 12.03.2020 10.00
+S1011	     / P105	  / Z496      / 12.03.2020 13.00
+S1034	     / P123	  / Z503      / 12.03.2020 15.00
+S1011	     / P108	  / Z500      / 14.03.2020 10.00
+S1024	     / P108	  / Z503      / 16.03.2020 17.00
+S1045	     / P120	  / Z500      / 18.03.2020 09.00
+S1034	     / P130	  / Z496      / 20.03.2020 08.00
+
+Tabela 2
+Stworzenie osobnych tabel Dostawcy, w której przechowywane będą Nazwy dostawców, ich adresy i klucze główne, w głównej tabeli będzie jedynie odwołanie do tych tabel w postaci klucza obcego,
+w głównej tabeli Zamówienia można rozbić cenę na osobne kolumny Cena netto i Cena brutto.
+
+Dostawcy											Zamówienia
+IDDostawcy / Nazwa Dostawcy / Adres								Produkt / Dostawca1 / Dostawca2 / Cena netto / Cena brutto
+A1	   / Makarony Polskie / Turystyczna 40, Kraków						Makaron nitki / A1  / A2	/ 130	     / 150
+A2	   / Lubelski Makaron / Piłsudskiego 332a, Lublin					Keczup pikantny / A3/ A4	/ 200	     / 220
+A3	   / Polskie przetwory / Wojska Polskiego 44, Kraków					Sos pomidorowy / A3 / A5	/ 89	     / 110
+A4	   / Przetwory pomidorowe / Rolnicza 22/4, Tarnów
+A5	   / Małopolskie smaki / Mickiewicza 223/77, Nowy Targ
