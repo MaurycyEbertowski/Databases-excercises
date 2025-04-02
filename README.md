@@ -1,1 +1,1 @@
-### Exercises from university database course.
+### Exercises from university databases course.
